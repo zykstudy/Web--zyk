@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="web3.dao.GoodsDao">
+    <resultMap id="BaseResultMap" type="web3.domain.Goods">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="itemno" jdbcType="VARCHAR" property="itemno" />
+        <result column="barcode" jdbcType="VARCHAR" property="barcode" />
+        <result column="name" jdbcType="VARCHAR" property="name" />
+        <result column="typeone" jdbcType="VARCHAR" property="typeone" />
+        <result column="typetwo" jdbcType="VARCHAR" property="typetwo" />
+        <result column="price" jdbcType="VARCHAR" property="price" />
+        <result column="miniprice" jdbcType="VARCHAR" property="miniprice" />
+        <result column="proprice" jdbcType="VARCHAR" property="proprice" />
+        <result column="spec" jdbcType="VARCHAR" property="spec" />
+        <result column="area" jdbcType="VARCHAR" property="area" />
+        <result column="unit" jdbcType="VARCHAR" property="unit" />
+        <result column="company" jdbcType="VARCHAR" property="company" />
+        <result column="state" jdbcType="VARCHAR" property="state" />
+    </resultMap>
+
+
+    <select id="queryGoods" resultMap="BaseResultMap">
+        select * from `goods`
+        <include refid="queryWhere"></include>
+        limit #{indexstart}, #{size}
+    </select>
+
+    <select id="queryCount" resultType="java.lang.Integer">
+        select count(*) from `goods`
+        <include refid="queryWhere"></include>
+    </select>
+
+    <sql id="queryWhere">
+        <where>
+            <if test="id != null and id != ''">
+               and id = #{id}
+            </if>
+            <if test="null != itemno and itemno != ''">
+               and itemno like '%${itemno}%'
+            </if>
+            <if test="null != barcode and barcode != ''">
+               and  barcode like  '%${barcode}%'
+            </if>
+        </where>
+    </sql>
+
+
+
+
+</mapper>

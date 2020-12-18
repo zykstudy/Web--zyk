@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap-table-master/dist/bootstrap-table.css">
+    <script type="text/javascript" src="./js/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="./js/vue.js"></script>
+    <script type="text/javascript" src="bootstrap-table-master/dist/bootstrap-table.min.js"></script>
+</head>
+<style>
+    #app{
+        width: 1200px;
+        height: 800px;
+        margin: 0 auto;
+    }
+    #header{
+        width: 1200px;
+        height: 50px;
+        background-color: #1E90FF;
+        margin-top: 20px;
+        padding-top: 18px;
+    }
+    .headerspan{
+        margin-left: 20px
+    }
+    .searchdiv{
+        width: 1000px;
+        height: 40px;
+    }
+    #footer{
+        width: 1200px;
+        height: 40px;
+        padding-top: 20px;
+    }
+</style>
+
+<body>
+    <div id="app">
+        <!--头部导航-->
+        <div id="header">
+            <span class="headerspan">首页</span>
+            <span class="headerspan">商品管理</span>
+            <span class="headerspan">订单管理</span>
+            <span class="headerspan">财务管理</span>
+            <span class="headerspan">报关管理</span>
+            <span class="headerspan">数据维护</span>
+            <span class="headerspan">系统管理</span>
+            <span class="headerspan">当前用户：admin</span>
+            <span class="headerspan"  style="margin-left: 260px">武汉超级有限公司：系统管理员</span>
+        </div>
+        <!--商品总览-->
+        <div style="background-color: #F0F0F0; height: 30px; padding-left: 20px; padding-top: 5px;margin-bottom: 3px">商品总览</div>
+        <!--搜索栏-->
+        <div class="searchdiv">
+            <div class="col-lg-2">
+                <input type="text" class="form-control" v-model="itemno" placeholder="请输入商品货号">
+            </div>
+            <div class="col-lg-2">
+                <input type="text" class="form-control" v-model="barcode" placeholder="请输入条形码">
+            </div>
+            <div class="col-lg-3">
+                <!--<input type="text" class="form-control" placeholder="Search for...">-->
+                <select class="form-control">
+                    <option>--所有公司--</option>
+
+                </select>
+            </div>
+            <button type="button" class="btn btn-default" style="background-color: #008000; color: white" v-on:click="search()">搜索</button>
+            <button type="button" class="btn btn-default" style="background-color: #D00000; color: white">清除条件</button>
+        </div>
+        <table id="table"></table>
+        <div id="footer">
+
+            <span style="margin-top: 20px;">每页显示条记录，显示第{{start}}到{{end}}条记录，总共{{page.recordCount}}条记录</span>
+            <div style="float: right; margin-top: -30px">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li>
+                            <a href="#" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li v-for="(item, index) in page.pageCount"><a href="#">{{index + 1}}</a></li>
+                        <li>
+                            <a href="#" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    var vue = new Vue({
+        el: '#app',
+        data: {
+            page:[],
+            itemno:'',
+            barcode:'',
+            start:'',
+            end:''
+        },
+        methods:{
+            search:function () {
+                this.initdate()
+            },
+            initdate:function () {
+                //先销毁表格
+                $('#table').bootstrapTable('destroy');
+                var _this = this;
+                $('#table').bootstrapTable({
+                    url: '/queryGoods',
+                    responseHandler: function (res) {
+                        console.log(res)
+                        vue.page = res;
+                        // 设置起始索引位置和结束索引位置
+                        vue.start = (res.curentPageIndex - 1) * 10;
+                        if(vue.page.recordCount - 10 > vue.start){
+                            vue.end = 10;
+                        }else{
+                            vue.end = vue.page.recordCount;
+                        }
+                        return eval(res.goodsList)
+                    },
+                    queryParams: function (params) {
+                        console.log(_this.itemno)
+                        var itemno = _this.itemno;
+                        var barcode = _this.barcode;
+                        return {
+                            itemno : itemno,
+                            barcode : barcode
+                        };
+                    },
+                        columns: [{
+                            checkbox: true
+                            },{
+                            field: 'itemno',
+                            title: '商品货号',
+                            width:'20px'
+                            },{
+                            field: 'barcode',
+                            title: '条形码',
+                            width:'20px'
+                            },{
+                            field: 'name',
+                            title: '商品名称',
+                            width:'20px'
+                        },{
+                            field: 'typeone',
+                            title: '一级分类',
+                            width:'20px'
+                            },{
+                            field: 'typetwo',
+                            title: '二级分类',
+                            width:'20px'
+                            },{
+                            field: 'price',
+                            title: '供货价格',
+                            width:'20px'
+                            },{
+                            field: 'miniprice',
+                            title: '最低价格',
+                            width:'20px'
+                            },{
+                            field: 'proprice',
+                            title: '推荐价格',
+                            width:'20px'
+                            },{
+                            field: 'spec',
+                            title: '商品规格',
+                            width:'20px'
+                            },{
+                            field: 'area',
+                            title: '商品产地',
+                            width:'20px'
+                            },{
+                            field: 'unit',
+                            title: '计量单位',
+                            width:'20px'
+                            },{
+                            field: 'company',
+                            title: '商品提供企业',
+                            width:'20px'
+                            },{
+                            field: 'state',
+                            title: '审核状态',
+                            width:'20px'
+                        },]
+                });
+            }
+        },
+        create:function () {
+            
+        },
+        mounted:function () {
+            this.initdate();
+        }
+    })
+
+</script>
+</html>
